@@ -1,46 +1,15 @@
+#########################################################
+#
+# Music Helper Functions
+# Oliver Dressler, 2013
+#
+#########################################################
+
 import random
 import math
 
-#Major progressions from
-#http://mugglinw.ipower.com/chordtab_maps/images/genmap.gif
-
-sharp_map = ['c', 'c#', 'd', 'd#', 'e', 'f', 'f#', 'g', 'g#', 'a', 'a#', 'h']
-b_map = ['c', 'db', 'd', 'eb', 'e', 'f', 'gb', 'g', 'ab', 'a', 'b', 'h']
-
-#add per note (intervall)
-add_per_note = {5: 7, 6: 9, 7: 10, 9: 14, 11: 17, 13: 21}
-
-#Relative tones
-relative_map = {'I': 0, 'II': 2, 'III': 4, 'IV': 5, 'V': 7, 'VI': 9, 'VII': 11}
-
-guitar_strings = ['E', 'a', 'd', 'g', 'b', 'e']
-guitar_tones = [4, 9, 2, 7, 11, 4]
-
-major_progressions = {
-    'III #7 b5': ['VI'], 'VI': ['II m'], 'I# dim b7': ['II m'], 
-    'IV# #7 b5': ['VII'], 'VII': ['III m'], 'II# dim b7': ['III m'], 
-    'II m': ['V', 'III m', 'IV #7', 'IIb 7', 'I /V'], 
-    'IV #7': ['I'], 'IIb 7': ['I'], 'III m': ['I', 'IV', 'VI m'],
-    'V m': ['I 7', 'I 9', 'I b9'], 'I 7': ['IV'], 'I 9': ['IV'],
-    'I b9': ['IV'],'III #7 b5': ['IV'],'I #6': ['II', 'V /II'], 
-    'V /II': ['II'], 'II': ['V'], 'IV# #7 b5': ['V'],
-    'VIb': ['VIIb'], 'VIIb': ['I'], 'V': ['III m', 'VI m', 'I'],
-    'IV': ['V', 'I', 'I /V', 'II m'], 'VI m': ['IV', 'II m'],
-    'I /V': ['V'], 'IV /I': ['I'], 'V /I': ['I'],
-    'I': ['IV /I', 'V /I'], 'VIb 7': ['I /V'], 'VIIb 9': ['I /V'], 
-    'IV# #7 b5': ['I /V'],'I dim /IIIb': ['II m'],
-    'VII #7 b5': ['III'], 'III': ['VI m'], 'V# dim 7': ['VI m'],
-    'VI #7 b5': ['II'], 'VI dim b7 b5': ['II']
-     }
-
-major_additions = {
-    'II m': ['#7', '#9'], 'III m': ['#7'], 'IV': ['m', '6', '#7'],
-    'V': ['sus', '7', '9', '11', '13'], 'VI m': ['#7', '#9'],
-    'II m': ['#7', '#9'], 'I': ['sus', '9', '#9', '#7', '6']
-    }
-
-for chord in ['VI', 'VII', 'II', 'III']:
-    major_additions[chord] = ['7', '9', 'b9']
+# Get all the music theory (parameters)
+from theory import *
 
 def quick_song(chord_list, pause = True):
     bar_inp = raw_input('Around which bar do you want to play? E.g. 5 or 4-8\n')
@@ -79,100 +48,6 @@ def find_tone(tone_str):
     
     elif tone_str in b_map:
         return b_map.index(tone_str), True
-
-def create_progression(num_chords = 4, ends_in_I = True, spicyness = 2):
-    '''!!! UNTESTED !!!'''
-    def random_progression(num_chords):
-        #random start chord
-        prog = [random.choice(major_progressions.keys())]
-        last = 0
-        while len(prog) < num_chords:
-            prog.append(random.choice(major_progressions[prog[last]]))
-            last += 1
-        return prog
-    
-    num = 0
-    while num < 1000:
-        num += 1
-        prog = random_progression(num_chords)    
-        if not (ends_in_I and prog[len(prog)-1] != 'I'):
-            if prog.count('I') <= 2:
-                #spice up the progression
-                for c_id in range(len(prog)):
-                    for i in [0] * random.randrange(0, spicyness + 1):
-                        try:
-                            add = random.choice(major_additions[prog[c_id]])
-                            prog[c_id] += ' ' + add
-                        except KeyError:
-                            pass
-                return prog
-            
-def random_chord(num_tones = 4):
-    tones = []
-    for i in range(num_tones):
-        tones.append(random.choice(range(12)))
-    
-    return tones
-
-def cast_chord(chord, key):
-    '''
-    !!! UNTESTED !!!
-    Casts a relative chord (e.g III m 7) in a key (number of I),
-    key can be either an integer or a string (e.g. Eb)'''
-    
-    if type(key) == str:
-        tone, use_b = find_tone(key)
-    elif type(key) == int:
-        tone = key
-        use_b = False
-    
-    if use_b:
-        conv_table = b_map
-    else:
-        conv_table = sharp_map
-    
-    relative_order = ['VII', 'VI', 'IV', 'V', 'III', 'II', 'I']
-    for literal in relative_order:
-        value = relative_map[literal]
-        actual_tone = (tone + value)%12
-        found = False
-        while not found:
-            ind = chord.find(literal)
-            if ind == -1:
-                found = True
-            else:
-                #check if sign is followed by b or #
-                length = len(literal)
-                end = ind + length
-                try:
-                    after = chord[ind + length]
-                    if after == '#':
-                        actual_tone += 1
-                        end += 1
-                    elif after == 'b':
-                        actual_tone -= 1
-                        end += 1
-                except Exception, e:
-                    pass
-                    
-                chord = chord[:ind] + conv_table[actual_tone] + chord[end:]
-    
-    return chord
-
-def calculate_stdev(q):
-    '''
-        From: http://www.daniweb.com/software-development/python/
-        threads/438922/finding-the-standard-deviation-in-python
-    '''
-    avg = float(sum(q))/len(q)
-    dev = []
-    for x in q:
-        dev.append(x - avg)
-    sqr = []
-    for x in dev:
-        sqr.append(x * x)
-    standard_dev = math.sqrt(sum(sqr)/(len(sqr)-1))
-    return standard_dev
 
 def find_tones(chord_str):
     '''
@@ -512,7 +387,23 @@ def convert_tab(tab):
 
     return ''.join(tab_list)
 
+def calculate_stdev(q):
+    '''
+        From: http://www.daniweb.com/software-development/python/
+        threads/438922/finding-the-standard-deviation-in-python
+    '''
+    avg = float(sum(q))/len(q)
+    dev = []
+    for x in q:
+        dev.append(x - avg)
+    sqr = []
+    for x in dev:
+        sqr.append(x * x)
+    standard_dev = math.sqrt(sum(sqr)/(len(sqr)-1))
+    return standard_dev
+
 def convert_chords_to_midi(chord_list, filename):
+    '''Requires pyknon to create the midi...'''
     from pyknon.music import NoteSeq
     from pyknon.genmidi import Midi
 
@@ -529,5 +420,81 @@ def convert_chords_to_midi(chord_list, filename):
     midi.seq_chords(chord_prog, 0, 0)
     midi.write(filename)
 
-#chord_strings = ['a sus 9', 'd m /a', 'e m', 'a m 9', 'c b5 7 9 11 13']
-#chord_strings = ['G#', 'C m', 'F m']
+def create_progression(num_chords = 4, ends_in_I = True, spicyness = 2):
+    '''!!! UNTESTED !!!'''
+    def random_progression(num_chords):
+        #random start chord
+        prog = [random.choice(major_progressions.keys())]
+        last = 0
+        while len(prog) < num_chords:
+            prog.append(random.choice(major_progressions[prog[last]]))
+            last += 1
+        return prog
+    
+    num = 0
+    while num < 1000:
+        num += 1
+        prog = random_progression(num_chords)    
+        if not (ends_in_I and prog[len(prog)-1] != 'I'):
+            if prog.count('I') <= 2:
+                #spice up the progression
+                for c_id in range(len(prog)):
+                    for i in [0] * random.randrange(0, spicyness + 1):
+                        try:
+                            add = random.choice(major_additions[prog[c_id]])
+                            prog[c_id] += ' ' + add
+                        except KeyError:
+                            pass
+                return prog
+            
+def random_chord(num_tones = 4):
+    tones = []
+    for i in range(num_tones):
+        tones.append(random.choice(range(12)))
+    
+    return tones
+
+def cast_chord(chord, key):
+    '''
+    !!! UNTESTED !!!
+    Casts a relative chord (e.g III m 7) in a key (number of I),
+    key can be either an integer or a string (e.g. Eb)'''
+    
+    if type(key) == str:
+        tone, use_b = find_tone(key)
+    elif type(key) == int:
+        tone = key
+        use_b = False
+    
+    if use_b:
+        conv_table = b_map
+    else:
+        conv_table = sharp_map
+    
+    relative_order = ['VII', 'VI', 'IV', 'V', 'III', 'II', 'I']
+    for literal in relative_order:
+        value = relative_map[literal]
+        actual_tone = (tone + value)%12
+        found = False
+        while not found:
+            ind = chord.find(literal)
+            if ind == -1:
+                found = True
+            else:
+                #check if sign is followed by b or #
+                length = len(literal)
+                end = ind + length
+                try:
+                    after = chord[ind + length]
+                    if after == '#':
+                        actual_tone += 1
+                        end += 1
+                    elif after == 'b':
+                        actual_tone -= 1
+                        end += 1
+                except Exception, e:
+                    pass
+                    
+                chord = chord[:ind] + conv_table[actual_tone] + chord[end:]
+    
+    return chord
