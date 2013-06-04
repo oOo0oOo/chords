@@ -12,6 +12,7 @@ import math
 from theory import *
 
 def quick_song(chord_list, pause = True):
+    '''Song is a list of chord_str.'''
     bar_inp = raw_input('Around which bar do you want to play? E.g. 5 or 4-8\n')
     try:
         bar = int(bar_inp)
@@ -29,6 +30,7 @@ def quick_song(chord_list, pause = True):
             raw_input('Press enter for next chord...')
 
 def quick_tab(chord_str, bar, convert = True):
+    '''Returns tabs or string describing tabs from chord_str.'''
     tones, use_b = find_tones(chord_str)
     tabs = create_tabs(tones, position = bar)
     if convert:
@@ -40,7 +42,7 @@ def quick_tab(chord_str, bar, convert = True):
         return tabs
 
 def find_tone(tone_str):
-    '''returns tone value (integer) and b (or #) used'''
+    '''returns tone value (integer) and b_used (as opposed to #).'''
     tone_str = tone_str.lower()
     #Find base tone
     if tone_str in sharp_map:
@@ -137,7 +139,7 @@ def find_tones(chord_str):
             chord.append((base + 7) % 12)
     
     def uniquify(seq, idfun=None):
-        #order preserving uniquify
+        #order preserving unique
         if idfun is None:
             def idfun(x): return x
         seen = {}
@@ -153,14 +155,17 @@ def find_tones(chord_str):
     return chord, use_b
 
 def convert_chord(chord, use_b = False):
+    '''
+        Convert chord to string of all tones.
+    '''
     if use_b:
         conv_table = b_map
     else:
         conv_table = sharp_map
         
-    chord_str = ''
-    for tone in chord:
-        chord_str += conv_table[tone] + ' '
+    chord_str = conv_table[chord[0]]
+    for tone in chord[1:]:
+        chord_str +=  ' ' + conv_table[tone]
     
     return chord_str
 
@@ -240,9 +245,9 @@ def create_tabs(chord, position = 1):
     tabs = [t[1] for t in tabs]
     return tabs
 
-def create_tab_OLD(chord):
+def create_tab_VARIANT(chord):
     '''
-        Creates a tab configuration on a 6-string guitar.
+        Creates a tab configuration using a semi-stupid probabilistic approach...
     '''
     # Maximal mean of all bars pressed (excluding empty strings)
     max_mean = 5
