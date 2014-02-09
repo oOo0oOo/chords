@@ -4,6 +4,8 @@
 #
 #########################################################
 
+#import numpy as np
+
 sharp_map = ['c', 'c#', 'd', 'd#', 'e', 'f', 'f#', 'g', 'g#', 'a', 'a#', 'h']
 b_map = ['c', 'db', 'd', 'eb', 'e', 'f', 'gb', 'g', 'ab', 'a', 'b', 'h']
 
@@ -15,6 +17,21 @@ relative_map = {'I': 0, 'II': 2, 'III': 4, 'IV': 5, 'V': 7, 'VI': 9, 'VII': 11}
 
 guitar_strings = ['E', 'a', 'd', 'g', 'b', 'e']
 guitar_tones = [4, 9, 2, 7, 11, 4]
+
+# Chord Detection parameters
+tone_weights = [2.0, 0.1, 0.25, 0.7, 0.8, 0.35,
+                0.1, 1.3, 0.3, 0.2, 0.3, 0.2]
+
+# Construct array of every possible bass tone 
+#t = np.array(tone_weights)
+
+keyboard_map = ['a', 'w', 's', 'e', 'd', 
+    'f', 't', 'g', 'y', 'h', 'u', 'j', 'k']
+
+pygame_key_map = [97, 119, 115, 101, 100, 
+    102, 116, 103, 121, 104, 117, 106, 
+    107, 111, 108, 112, 59, 39, 93, 92
+]
 
 #Major progressions from
 #http://mugglinw.ipower.com/chordtab_maps/images/genmap.gif
